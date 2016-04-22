@@ -28,7 +28,7 @@ var squares = function() {
 
 
 
-	$('.instaimg img').each(function () {
+	$('.instaimg img').load(function () {
 
 		var imgw = $(this).width();
 		var imgh = $(this).height();
@@ -52,50 +52,10 @@ var squares = function() {
 };
 
 squares();
-// $(window).load(squares);
-
-// $('.instaimg').hover(function() {
-
-// 	if ( $(this).has('.caption').length > 0) {
-// 		$(this).find('.caption').show();
-// 	}
-// 	else {
-// 		$('<div>').addClass('caption')
-// 		.text(  $(this).find('img').attr('data-caption') )
-// 		.prependTo( this )
-// 		.show();
-// 	};
-
-// 	$(this).find('img').addClass('zoom');
-	
-// }, 
-
-// function() {
-
-// 	$(this).find('img').removeClass('zoom');
-// 	$(this).find('.caption').hide();
-
-// });
-
-
-
-//////////////////GET INTSTAGRAM FEED - DOES NOT WORK YET//////////////////
-$.getJSON('user-media-recent.php?callback=?', { q: "183122502" }, function(data) {
-	
-	console.log(data);
-
-	// $.each(data, function(i, pic) {
-	// 	$('<img>').attr('src',pic.images.standard_resolution.url).appendTo('body');
-	// });
-
-})
-/////////////////////////////////////////////////////////////////////////////////
-
-
 
 var searchphotos = function(term) {
 
-	$('.gallery').empty();
+	$('.feed').empty();
 
 	var flickr = 'http://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?';
 
@@ -103,14 +63,28 @@ var searchphotos = function(term) {
 
 	$.getJSON(flickr, params, function(result) {
 
+		console.log(result);
+
+
 		$.each(result.items, function(index, photo) {
 				// index = node/photo number, starting at 0, increasing by 1 EACH time
 				// photo = is the photo {object} itself
+
+
+			if (index < 9) {
+				
+				var user = photo.author;
+				user = user.replace('nobody@flickr.com (','');
+				user = user.replace(')','');
+				
 				$('<img>')
 					.attr('src', photo.media.m)
 					.attr('alt', photo.title)
-					.appendTo('.gallery')
+					.attr('data-user', user)
+					.appendTo('.feed')
+					.wrap('<a href="'+photo.link+'" target="_blank"></a>')
 					.wrap("<figure class='instaimg'></figure>");
+			}
 
 		});
 
@@ -122,10 +96,19 @@ var searchphotos = function(term) {
 					$(this).find('.caption').show();
 				}
 				else {
-					$('<div>').addClass('caption')
-					.text(  $(this).find('img').attr('alt') )
+
+					$author = $('<p>').addClass('author');
+
+					$author
+					.text(  $(this).find('img').attr('data-user') )
 					.prependTo( this )
+					.wrap('<div class="caption"></div>');
+
+					$('<p>').addClass('title')
+					.text(  $(this).find('img').attr('alt') )
+					.prependTo( $author )
 					.show();
+
 				};
 
 				$(this).find('img').addClass('zoom');
@@ -136,7 +119,6 @@ var searchphotos = function(term) {
 					$(this).find('.caption').hide();
 
 				});
-
 	});
 
 
